@@ -1,11 +1,17 @@
-
 import './App.css'
+import { BrowserRouter as Router,Routes,Route } from 'react-router-dom'
+import LandingPage from './pages/LandingPage'
+import LoadingScreen from './components/common/LoadingScreen';
 
 function App() {
-
+ 
   return (
     <>
-      <h1 className='text-3xl font-bold text-red-500 bg-green-300 bg-transparent '>Hello World</h1>
+    <Router>
+      <Routes>
+        <Route path='/' element={<LandingPage/>}></Route>
+      </Routes>
+    </Router>
     </>
   )
 }
