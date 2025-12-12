@@ -1,0 +1,15 @@
+# Ignore dependencies in all folders
+node_modules/
+
+# Ignore build outputs
+dist/
+build/
+
+# Ignore environment variables (Security Critical)
+.env
+.env.local
+.env.production
+
+# Misc
+.DS_Store
+.vscode/
