@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-const GlassCard = ({ children, className = "", delay = 0 }) => {
+const GlassCard = ({ children, className = "", }) => {
   return (
     <motion.div
       iinitial={{ opacity: 0, y: 50 }} 
@@ -9,7 +9,7 @@ const GlassCard = ({ children, className = "", delay = 0 }) => {
       viewport={{
         once: false, 
         amount: 0.3, 
-        margin: "-90px", 
+        margin: "-90px",  
       }}
       className={`
         relative overflow-hidden
@@ -22,7 +22,6 @@ const GlassCard = ({ children, className = "", delay = 0 }) => {
         ${className}
       `}
     >
-      {/* Optional: Simple shine effect inside */}
       <div className="absolute top-0 left-0 w-full h-full bg-white/5 pointer-events-none" />
 
       {children}

@@ -37,17 +37,14 @@ const LandingPage = () => {
 
   const { scrollYProgress } = useScroll();
 
-
-  const boxY = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  
+  const boxY = useTransform(scrollYProgress, [0, 1], [0, 300]);
   
   const boxRotate = useTransform(scrollYProgress, [0, 1], [0, 360]);
 
- 
   const boxX = useTransform(
     scrollYProgress, 
-    [0, 0.5,  1],       
-    [350, -900,  350]    
+    [0, 0.5, 1],       // Checkpoints
+    [300,-900,300]     // Position: Start -> Right -> Left -> Right
   );
 
   const aboutRef = useRef(null);
@@ -91,22 +88,22 @@ const LandingPage = () => {
   return (
     <div className="relative min-h-screen text-white selection:bg-blue-500 selection:text-white">
       
-      
       <motion.div 
         className="bg-gradient-animate fixed inset-0 z-0"
         style={{ background: background }} 
       />
       
-      
+    
       <div className="relative z-10">
         
         
         <motion.div 
           style={{ 
             y: boxY, 
-            x: boxX,       
+            x: boxX,     
             rotate: boxRotate 
           }}
+          
           className="fixed top-[20%] right-[30%] z-0 hidden lg:flex items-center justify-center w-24 h-24 bg-white/5 border border-white/20 backdrop-blur-sm rounded-3xl shadow-2xl pointer-events-none"
         >
            <Box className="w-10 h-10 text-white/50" />
@@ -133,7 +130,7 @@ const LandingPage = () => {
                 Full Stack MERN Solution
               </span>
               <h1 className="text-5xl md:text-7xl font-extrabold mb-8 leading-tight tracking-tight drop-shadow-2xl">
-                Where Data Meets <br />
+               Where Data Meets <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-purple-300 to-orange-300">
                   Modern Transparency
                 </span>
@@ -160,7 +157,7 @@ const LandingPage = () => {
               <GlassCard className="py-12 border-blue-400/30">
                 <h2 className="text-3xl font-bold mb-6">About The Project</h2>
                 <p className="text-lg text-white/70 leading-relaxed">
-                  GlassBoard is a comprehensive <strong>Admin Dashboard System</strong> designed to demonstrate the power of the MERN stack. 
+                  GlassBoard is a comprehensive <strong>Admin Dashboard System  </strong>  
                   It combines a robust Node.js backend with a highly interactive React frontend, featuring 
                   authentication, data visualization, and real-time updates—all wrapped in a modern, 
                   frosted-glass aesthetic.
