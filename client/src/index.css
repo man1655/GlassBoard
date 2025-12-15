@@ -14,9 +14,9 @@ body {
 }
 
 .bg-gradient-animate {
-  background: linear-gradient(-45deg, #020617, #312e81, #be185d, #ea580c);
+  background: linear-gradient(-45deg, #020617, #312e81, #be185d, #0ea5e9);
   background-size: 400% 400%;
-  animation: gradient 15s ease infinite; 
+  animation: gradient 15s ease infinite; /* Changes every 10 seconds */
   position: fixed;
   top: 0;
   left: 0;
