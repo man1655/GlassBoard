@@ -1,51 +1,73 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, ArrowRight, Loader2, Box } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import GlassCard from '../../components/common/GlassCard';
+// 1. FIXED: Added useSelector import
+import { useDispatch, useSelector } from 'react-redux';
+// 2. CHECK PATH: Ensure this matches where you actually created the file
+import { registerUser, reset } from '../../redux//slices/authSlice'; 
+import { notify } from '../../utils/notify';
+
 
 const Register = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
-  const [error, setError] = useState('');
+  
+  const [customError, setCustomError] = useState('');
+
+  // 3. Get global state from Redux
+  const { user, isLoading, isError, isSuccess, message } = useSelector(
+    (state) => state.auth
+  );
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(''); // Clear errors when user types
+    setCustomError(''); // Clear error when user types
   };
+
+  useEffect(() => {
+    if (isError) {
+      notify.error(message)
+    }
+
+    if (isSuccess || user) {
+      notify.success('User Registered Successfully')
+      navigate('/'); 
+    }
+
+    dispatch(reset());
+  }, [user, isError, isSuccess, message, navigate, dispatch]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // 1. Basic Validation
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      notify.error("Password And Confirm Password Should Be Same")
       return;
     }
 
-    setLoading(true);
+    const userData = {
+      fullName: formData.fullName,
+      email: formData.email,
+      password: formData.password
+    };
 
-    // 2. Simulate API Call
-    setTimeout(() => {
-      console.log("Registering user:", formData);
-      setLoading(false);
-      navigate('/dashboard'); // Redirect to dashboard or login
-    }, 2000);
+    dispatch(registerUser(userData));
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center text-white overflow-hidden selection:bg-pink-500 selection:text-white">
       
-      {/* --- SHARED BACKGROUND --- */}
       <div className="bg-gradient-animate fixed inset-0 z-0" />
       
-      {/* --- FLOATING DECORATIVE BOX (Animated) --- */}
       <motion.div 
         animate={{ 
           y: [0, -20, 0], 
@@ -80,7 +102,6 @@ const Register = () => {
           <p className="text-blue-100/70">Join the future of data management.</p>
         </motion.div>
 
-        {/* --- REGISTER FORM CARD --- */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -89,10 +110,10 @@ const Register = () => {
           <GlassCard className="border-t border-white/20 shadow-2xl backdrop-blur-xl">
             <form onSubmit={handleSubmit} className="space-y-5">
               
-              {/* ERROR MESSAGE */}
-              {error && (
+              {/* Show Redux Error or Local Password Error */}
+              {(customError || isError) && (
                 <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm text-center">
-                  {error}
+                  {customError || message}
                 </div>
               )}
 
@@ -105,7 +126,7 @@ const Register = () => {
                     type="text" 
                     name="fullName"
                     required
-                    placeholder="John Doe"
+                    placeholder="Man Patel"
                     className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-blue-200/30 focus:outline-none focus:border-blue-400/50 focus:bg-white/10 transition-all"
                     onChange={handleChange}
                   />
@@ -121,7 +142,7 @@ const Register = () => {
                     type="email" 
                     name="email"
                     required
-                    placeholder="john@example.com"
+                    placeholder="man@example.com"
                     className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-blue-200/30 focus:outline-none focus:border-blue-400/50 focus:bg-white/10 transition-all"
                     onChange={handleChange}
                   />
@@ -163,16 +184,16 @@ const Register = () => {
               {/* SUBMIT BUTTON */}
               <button 
                 type="submit" 
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 mt-4"
+                // 4. FIXED: Use 'isLoading' from Redux, NOT local 'loading'
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Account"}
-                {!loading && <ArrowRight className="w-5 h-5" />}
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Account"}
+                {!isLoading && <ArrowRight className="w-5 h-5" />}
               </button>
 
             </form>
 
-            {/* FOOTER LINKS */}
             <div className="mt-6 text-center text-sm text-blue-200/60">
               Already have an account?{' '}
               <Link to="/login" className="text-blue-300 hover:text-white font-medium underline decoration-blue-300/30 underline-offset-4 transition-colors">

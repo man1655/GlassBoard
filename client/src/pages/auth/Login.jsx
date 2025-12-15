@@ -1,13 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, Loader2, Box } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import GlassCard from '../../components/common/GlassCard';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser, reset } from '../../redux/slices/authSlice';
+import { notify } from '../../utils/notify';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+ 
+  // const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const dispatch = useDispatch();
+
+  const { user, isLoading, isError, isSuccess, message } = useSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
+    if (isError) {
+      notify.error(message)
+    }
+    if (isSuccess || user) {
+      notify.success("User LogedIn Successfully")
+      navigate('/'); 
+    }
+    dispatch(reset());
+  }, [user, isError, isSuccess, message, navigate, dispatch]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -15,12 +35,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      console.log("Logging in with:", formData);
-      setLoading(false);
-      navigate('/profile'); 
-    }, 2000);
+    dispatch(loginUser(formData))
   };
 
   return (
@@ -42,7 +57,7 @@ const Login = () => {
          <Box className="w-10 h-10 text-white/50" />
       </motion.div>
 
-      {/* --- CONTENT LAYER --- */}
+      
       <div className="relative z-10 w-full max-w-md px-6">
         
         <motion.div
@@ -103,11 +118,11 @@ const Login = () => {
               {/* SUBMIT BUTTON */}
               <button 
                 type="submit" 
-                disabled={loading}
+                disabled={isLoading}
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign In"}
-                {!loading && <ArrowRight className="w-5 h-5" />}
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign In"}
+                {!isLoading && <ArrowRight className="w-5 h-5" />}
               </button>
 
             </form>

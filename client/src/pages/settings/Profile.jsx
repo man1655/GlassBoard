@@ -1,232 +1,282 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+// 1. Import the actions from your slice
+import { getMe, logout, reset, updateUserProfile } from '../../redux/slices/authSlice';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  User, Mail, Lock, Camera, Save, Shield, 
-  Bell, LogOut, LayoutDashboard 
-} from 'lucide-react';
 import GlassCard from '../../components/common/GlassCard';
-import { useNavigate } from 'react-router-dom';
+import { 
+  User, LogOut, Mail, MapPin, Phone, 
+  Camera, Edit2, Save, Tag
+} from 'lucide-react';
+import { notify } from '../../utils/notify';
+import GlassboardLoader from '../../components/common/LoadingScreen';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('general'); // 'general' or 'security'
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
-  // Mock User Data
-  const [userData, setUserData] = useState({
-    fullName: 'Alex Developer',
-    email: 'alex@glassboard.com',
-    role: 'Admin',
-    avatar: null
+  const fileInputRef = useRef(null);
+  
+  // 2. Get state from Redux
+  const { user, isLoading, isError, message } = useSelector((state) => state.auth);
+
+  // Local State for UI
+  const [isEditing, setIsEditing] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+
+  const [profileData, setProfileData] = useState({
+    bio: "",
+    location: "",
+    phone: "",
+    tagline: ""
   });
 
-  // Mock Password Data
-  const [passData, setPassData] = useState({
-    current: '',
-    new: '',
-    confirm: ''
-  });
+  useEffect(() => {
+    if (isError && message) {
+        notify.error(message) 
+    }
+    
+    if (!user) {
+        dispatch(getMe());
+    } else {
+        setProfileData({
+            bio: user.bio || "",
+            location: user.location || "",
+            phone: user.phone || "",
+            tagline: user.tagline || ""
+        });
+    }
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    // Simulate API Call
-    setTimeout(() => {
-      setLoading(false);
-      alert("Settings Updated Successfully!");
-    }, 1500);
+    return () => { dispatch(reset()); };
+  }, [dispatch, isError, message, user]);
+
+  const onLogout = () => {
+    notify.success("Logged Out User")
+    dispatch(logout());
+    dispatch(reset());
+    navigate('/');
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setImagePreview(URL.createObjectURL(file)); 
+    }
+  };
+
+  // Trigger hidden input click
+  const handleAvatarClick = () => {
+    if (isEditing) fileInputRef.current.click();
+    if(!isEditing) notify.error("First Edit To Upload Image")
+  };
+
+  
+  const handleSave = async () => {
+    
+    const formData = new FormData();
+    formData.append('bio', profileData.bio);
+    formData.append('location', profileData.location);
+    formData.append('phone', profileData.phone);
+    formData.append('tagline', profileData.tagline);
+    
+    formData.append('fullName', user.fullName);
+
+    // C. Append File ONLY if user picked one
+    if (selectedFile) {
+        formData.append('avatar', selectedFile);
+    }
+    
+    // D. Dispatch the Thunk
+    const result = await dispatch(updateUserProfile(formData));
+
+
+    if (updateUserProfile.fulfilled.match(result)) {
+        setIsEditing(false);
+        setSelectedFile(null); // Reset file selection
+        notify.success("Profile Updated Successfully!");
+    } else {
+        notify.error("Update failed: " + result.payload);
+    }
+  };
+
+  if (isLoading) {
+   return <GlassboardLoader/>
+  }
+
   return (
-    <div className="relative min-h-screen text-white selection:bg-blue-500 selection:text-white pb-20">
-      
-      {/* BACKGROUND (Same as Landing) */}
+    <div className="relative min-h-screen text-white p-6 md:p-12 overflow-hidden">
       <div className="bg-gradient-animate fixed inset-0 z-0" />
       
-      {/* NAVBAR (Simplified for Dashboard) */}
-      <nav className="relative z-50 px-6 py-4 bg-black/10 backdrop-blur-md border-b border-white/10 mb-10">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div 
-            onClick={() => navigate('/dashboard')}
-            className="text-xl font-bold tracking-tighter flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-          >
-            <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse" />
-            GlassBoard.
-          </div>
-          <button onClick={() => navigate('/')} className="text-sm text-blue-200/60 hover:text-white transition-colors flex items-center gap-2">
-            <LogOut className="w-4 h-4" /> Logout
-          </button>
-        </div>
-      </nav>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 flex flex-col md:flex-row gap-8">
+      {user ? (
         
-        {/* --- LEFT SIDEBAR (Navigation) --- */}
         <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="w-full md:w-1/4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative z-10 max-w-5xl mx-auto"
         >
-          <GlassCard className="p-4 space-y-2">
-            <div className="text-center mb-6 pt-4">
-              <div className="relative w-20 h-20 mx-auto mb-3 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 p-1">
-                <div className="w-full h-full rounded-full bg-[#0f172a] flex items-center justify-center overflow-hidden">
-                   {userData.avatar ? <img src={userData.avatar} alt="User" /> : <User className="w-8 h-8 text-blue-200" />}
+            <h1 className='text-center text-2xl font-bold font-sans relative top-10'>Profile Setting</h1>
+            <div className="flex justify-between items-center mb-8">
+                <div className='cursor-pointer'>
+                    <Link to="/" className="inline-block mb-4 group">
+                                <h1 className="text-3xl font-bold tracking-tighter flex items-center justify-center gap-2 group-hover:scale-105 transition-transform">
+                                  <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse" />
+                                  GlassBoard.
+                                </h1>
+                              </Link>
+                    <p className="text-blue-200/60 text-sm">Manage your personal details.</p>
                 </div>
-                <button className="absolute bottom-0 right-0 p-1.5 bg-blue-500 rounded-full hover:bg-blue-400 transition-colors shadow-lg">
-                  <Camera className="w-3 h-3 text-white" />
+                <button onClick={onLogout} className="flex items-center gap-2 bg-red-500/10 text-red-200 px-4 py-2 rounded-xl border border-red-500/20 hover:bg-red-500/20 transition-all">
+                    <LogOut size={18} /> Logout
                 </button>
-              </div>
-              <h3 className="font-bold text-lg">{userData.fullName}</h3>
-              <p className="text-xs text-blue-200/50 uppercase tracking-widest">{userData.role}</p>
             </div>
 
-            <div className="border-t border-white/10 my-4" />
-
-            {/* Sidebar Buttons */}
-            <button 
-              onClick={() => setActiveTab('general')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'general' ? 'bg-blue-500/20 border border-blue-400/30 text-white' : 'hover:bg-white/5 text-blue-200/60'}`}
-            >
-              <User className="w-5 h-5" /> General
-            </button>
-            <button 
-              onClick={() => setActiveTab('security')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'security' ? 'bg-blue-500/20 border border-blue-400/30 text-white' : 'hover:bg-white/5 text-blue-200/60'}`}
-            >
-              <Shield className="w-5 h-5" /> Security
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-blue-200/60 transition-all">
-              <Bell className="w-5 h-5" /> Notifications
-            </button>
-          </GlassCard>
-        </motion.div>
-
-
-        {/* --- RIGHT CONTENT AREA --- */}
-        <div className="w-full md:w-3/4">
-          
-          {/* TAB 1: GENERAL PROFILE */}
-          {activeTab === 'general' && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <GlassCard className="p-8">
-                <h2 className="text-2xl font-bold mb-1">Profile Information</h2>
-                <p className="text-blue-200/50 mb-8 text-sm">Update your account's public profile information.</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
                 
-                <form onSubmit={handleSave} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Full Name */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-blue-100/80">Full Name</label>
-                      <div className="relative">
-                        <User className="absolute left-4 top-3.5 w-5 h-5 text-blue-300/30" />
-                        <input 
-                          type="text" 
-                          value={userData.fullName}
-                          onChange={(e) => setUserData({...userData, fullName: e.target.value})}
-                          className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-blue-400/50 focus:bg-black/30 transition-all outline-none"
-                        />
-                      </div>
-                    </div>
+                <div className="lg:col-span-1">
+                    <GlassCard className="p-0 overflow-hidden relative text-center h-full flex flex-col">
+                        <div className="h-28 bg-gradient-to-r from-blue-500 to-blue-700 relative opacity-90" />
 
-                    {/* Email */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-blue-100/80">Email Address</label>
-                      <div className="relative">
-                        <Mail className="absolute left-4 top-3.5 w-5 h-5 text-blue-300/30" />
-                        <input 
-                          type="email" 
-                          value={userData.email}
-                          onChange={(e) => setUserData({...userData, email: e.target.value})}
-                          className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-blue-400/50 focus:bg-black/30 transition-all outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                        <div className="px-6 pb-8 relative -mt-14 flex-1 flex flex-col items-center">
+                            
+                            <div 
+                                onClick={handleAvatarClick}
+                                className={`relative inline-block w-28 h-28 rounded-full border-[5px] border-[#0f172a] bg-blue-600 shadow-xl overflow-hidden ${isEditing ? 'cursor-pointer hover:opacity-90' : ''} transition-all`}
+                            >
+                                {imagePreview ? (
+                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                ) : user.avatar ? (
+                                    <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-white">
+                                        {user.fullName.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                                
+                                {isEditing && (
+                                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white/90">
+                                        <Camera className="w-8 h-8 mb-1" />
+                                        <span className="text-[10px] font-bold uppercase tracking-widest">Upload</span>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
 
-                  {/* Bio / About */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-blue-100/80">Bio</label>
-                    <textarea 
-                      rows="4"
-                      placeholder="Tell us about yourself..."
-                      className="w-full bg-black/20 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-blue-400/50 focus:bg-black/30 transition-all outline-none resize-none"
-                    ></textarea>
-                  </div>
+                            <h2 className="text-2xl font-bold mt-4">{user.fullName}</h2>
+                            <p className="text-blue-300/70 text-sm mb-6">{user.email}</p>
 
-                  <div className="flex justify-end pt-4">
-                    <button type="submit" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20">
-                      <Save className="w-4 h-4" /> {loading ? 'Saving...' : 'Save Changes'}
-                    </button>
-                  </div>
-                </form>
-              </GlassCard>
-            </motion.div>
-          )}
+                            <div className="w-full mt-auto">
+                                <div className="bg-white/5 rounded-xl p-4 border border-white/10 w-full shadow-inner">
+                                    <label className="text-[10px] text-blue-200/50 uppercase tracking-widest font-bold flex items-center justify-center gap-1 mb-2">
+                                        <Tag size={10} /> Status
+                                    </label>
+                                    {isEditing ? (
+                                        <input 
+                                            type="text" 
+                                            value={profileData.tagline}
+                                            onChange={(e) => setProfileData({...profileData, tagline: e.target.value})}
+                                            className="w-full bg-black/20 text-center text-sm border-b border-blue-500/50 focus:outline-none py-1 text-white italic"
+                                            placeholder="Add a tagline..."
+                                        />
+                                    ) : (
+                                        <p className="text-white font-medium italic">
+                                            "{profileData.tagline || "Building Digital Dreams"}"
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </GlassCard>
+                </div>
 
-          {/* TAB 2: SECURITY (CHANGE PASSWORD) */}
-          {activeTab === 'security' && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <GlassCard className="p-8">
-                <h2 className="text-2xl font-bold mb-1">Security Settings</h2>
-                <p className="text-blue-200/50 mb-8 text-sm">Ensure your account is secure by setting a strong password.</p>
+                {/* --- RIGHT COLUMN: DETAILS FORM --- */}
+                <div className="lg:col-span-2">
+                    <GlassCard className="p-8 h-full flex flex-col">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold flex items-center gap-2">
+                                <User className="text-blue-400" size={20} /> Personal Information
+                            </h3>
+                            <button 
+                                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                                    isEditing ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-white/10 hover:bg-white/20'
+                                }`}
+                            >
+                                {isEditing ? <><Save size={16} /> Save Changes</> : <><Edit2 size={16} /> Edit Profile</>}
+                            </button>
+                        </div>
 
-                <form onSubmit={handleSave} className="space-y-6 max-w-lg">
-                  
-                  {/* Current Password */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-blue-100/80">Current Password</label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-3.5 w-5 h-5 text-blue-300/30" />
-                      <input 
-                        type="password" 
-                        placeholder="••••••••"
-                        className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-blue-400/50 focus:bg-black/30 transition-all outline-none"
-                      />
-                    </div>
-                  </div>
+                        <div className="space-y-6 flex-1">
+                            {/* Full Name & Email */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm text-blue-200/60 ml-1">Full Name</label>
+                                    <input type="text" disabled={true} defaultValue={user.fullName} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white/70 cursor-not-allowed"/>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm text-blue-200/60 ml-1">Email</label>
+                                    <div className="relative">
+                                        <Mail className="absolute left-4 top-3.5 text-blue-200/30 w-5 h-5" />
+                                        <input type="email" disabled defaultValue={user.email} className="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white/70 cursor-not-allowed"/>
+                                    </div>
+                                </div>
+                            </div>
 
-                  <div className="border-t border-white/5 my-2" />
+                            {/* Bio */}
+                            <div className="space-y-2">
+                                <label className="text-sm text-blue-200/60 ml-1">Bio</label>
+                                <textarea 
+                                    disabled={!isEditing} 
+                                    value={profileData.bio} 
+                                    onChange={(e) => setProfileData({...profileData, bio: e.target.value})} 
+                                    className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:border-blue-500 focus:outline-none resize-none disabled:opacity-50" 
+                                    rows="3"
+                                    placeholder="Tell us about yourself..."
+                                />
+                            </div>
 
-                  {/* New Password */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-blue-100/80">New Password</label>
-                    <div className="relative">
-                      <Shield className="absolute left-4 top-3.5 w-5 h-5 text-blue-300/30" />
-                      <input 
-                        type="password" 
-                        placeholder="••••••••"
-                        className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-blue-400/50 focus:bg-black/30 transition-all outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Confirm Password */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-blue-100/80">Confirm New Password</label>
-                    <div className="relative">
-                      <Shield className="absolute left-4 top-3.5 w-5 h-5 text-blue-300/30" />
-                      <input 
-                        type="password" 
-                        placeholder="••••••••"
-                        className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-blue-400/50 focus:bg-black/30 transition-all outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end pt-4">
-                    <button type="submit" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20">
-                      <Shield className="w-4 h-4" /> Update Password
-                    </button>
-                  </div>
-
-                </form>
-              </GlassCard>
-            </motion.div>
-          )}
-
-        </div>
-      </div>
+                            {/* Location & Phone */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm text-blue-200/60 ml-1">Location</label>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-4 top-3.5 text-blue-200/30 w-5 h-5" />
+                                        <input 
+                                            disabled={!isEditing} 
+                                            value={profileData.location} 
+                                            onChange={(e) => setProfileData({...profileData, location: e.target.value})} 
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-3 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                            placeholder="City, Country"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm text-blue-200/60 ml-1">Phone</label>
+                                    <div className="relative">
+                                        <Phone className="absolute left-4 top-3.5 text-blue-200/30 w-5 h-5" />
+                                        <input 
+                                            disabled={!isEditing} 
+                                            value={profileData.phone} 
+                                            onChange={(e) => setProfileData({...profileData, phone: e.target.value})} 
+                                            className="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-3 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                                            placeholder="+1 234 567 890"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </GlassCard>
+                </div>
+            </div>
+        </motion.div>
+      ) : (
+        <div className="text-center mt-20">Please login to view profile.</div>
+      )}
     </div>
   );
 };

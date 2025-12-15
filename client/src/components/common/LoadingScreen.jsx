@@ -1,39 +1,56 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 
-const LoadingScreen = () => {
+export default function GlassboardLoader() {
+  const letters = "GLASSBOARD".split('');
+
+  
+
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#020617] text-white">
-      
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/20 rounded-full blur-[100px]" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-pink-900">
+      <style>{`
+        @keyframes wave {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        @keyframes fadeFloat {
+          0%, 100% { opacity: 0.3; transform: translateY(0px); }
+          50% { opacity: 1; transform: translateY(-10px); }
+        }
+        .letter {
+          display: inline-block;
+          animation: wave 1.5s ease-in-out infinite;
+        }
+        .glass-panel {
+          backdrop-filter: blur(20px);
+          background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .floating-shape {
+          animation: fadeFloat 3s ease-in-out infinite;
+        }
+      `}</style>
 
-      <div className="relative z-10 flex flex-col items-center">
-        
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-          className="w-16 h-16 rounded-full border-4 border-t-blue-400 border-r-transparent border-b-blue-600 border-l-transparent"
-        />
+      <div className="relative">
+        {/* Floating shapes */}
+        <div className="absolute -top-32 left-0 w-32 h-32 border-4 border-cyan-400/30 rounded-full floating-shape" style={{ animationDelay: '0s' }}></div>
+        <div className="absolute -bottom-32 right-0 w-24 h-24 border-4 border-purple-400/30 rounded-full floating-shape" style={{ animationDelay: '0.5s' }}></div>
+        <div className="absolute top-0 -right-32 w-20 h-20 border-4 border-pink-400/30 rounded-full floating-shape" style={{ animationDelay: '1s' }}></div>
 
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          className="absolute top-0 left-0 w-16 h-16 flex items-center justify-center"
-        >
-          <div className="w-4 h-4 bg-blue-400 rounded-full shadow-[0_0_20px_2px_rgba(96,165,250,0.8)]" />
-        </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-8 text-lg font-medium tracking-widest text-blue-200/80 uppercase"
-        >
-          Loading GlassBoard
-        </motion.p>
+        {/* Main glass panel */}
+        <div className="glass-panel rounded-2xl px-12 py-10 border border-white/20">
+          <h1 className="text-6xl font-black">
+            {letters.map((letter, i) => (
+              <span 
+                key={i}
+                className="letter text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                {letter}
+              </span>
+            ))}
+          </h1>
+        </div>
       </div>
     </div>
   );
-};
-
-export default LoadingScreen;
+}
