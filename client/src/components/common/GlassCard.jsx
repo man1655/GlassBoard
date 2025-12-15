@@ -5,7 +5,7 @@ const GlassCard = ({ children, className = "", }) => {
     <motion.div
       iinitial={{ opacity: 0, y: 50 }} 
       whileInView={{ opacity: 1, y: 0 }} 
-      transition={{ duration: 0.5 }} 
+      transition={{ duration:0.7 }} 
       viewport={{
         once: false, 
         amount: 0.3, 
