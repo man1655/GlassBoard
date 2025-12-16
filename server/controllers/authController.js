@@ -120,3 +120,33 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const changePassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  // 1. Get the user ID from the request (set by middleware)
+  const userId = req.user._id;
+
+  // 2. ⚠️ CRITICAL FIX: Find the user again and EXPLICITLY ask for the password
+  // The 'select' with '+password' overrides the default exclusion if defined in schema
+  const user = await User.findById(userId).select('+password'); 
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  // 3. Now this works because user.password is defined
+  const isMatch = await user.matchPassword(oldPassword);
+
+  if (!isMatch) {
+    res.status(401);
+    throw new Error("Invalid current password"); // Security: Generic message is better
+  }
+
+  // 4. Update and Save
+  user.password = newPassword; // Your pre-save hook handles hashing
+  await user.save();
+
+  res.status(200).json({ message: "Password updated successfully" });
+};
