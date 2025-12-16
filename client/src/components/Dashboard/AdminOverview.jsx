@@ -6,7 +6,7 @@ import {
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
-import StatCard from '../../components/dashboard/StatCard';
+import StatCard from '../../components/Dashboard/StatCard';
 import GlassCard from '../../components/common/GlassCard';
 import { fetchDashboardStats, fetchDashboardChart } from '../../redux/slices/dashboardSlice';
 import { useDispatch, useSelector } from 'react-redux';
