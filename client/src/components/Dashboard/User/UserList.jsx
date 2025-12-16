@@ -7,7 +7,7 @@ import {
 
 // Reuse your existing components to match design
 import GlassCard from '../../../components/common/GlassCard';
-import StatCard from '../../../components/dashboard/StatCard';
+import StatCard from '../../../components/Dashboard/StatCard';
 import UserModal from './UserModal'; 
 
 // Mock Data
