@@ -4,7 +4,6 @@ import { protect } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 
 const Router=express.Router();
-
 Router.post('/login',UserLogin)
 Router.post('/register',UserRegister)
 Router.get('/me',protect,getMe)

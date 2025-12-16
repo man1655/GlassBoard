@@ -30,8 +30,7 @@ const userSchema = new mongoose.Schema(
     // --- 2. PROFILE DATA (BE-10) ---
     Role: {
       type: String,
-      enum: ["user", "admin"],
-      default:'user'
+      default:'Member'
     },
     avatar: {
       type: String,

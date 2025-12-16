@@ -4,9 +4,18 @@ import cloudinary from "../utils/cloudinary.js";
 // Service to handle Registration Logic
 export const registerUser = async ({ fullName, email, password }) => {
   // 1. Check if user exists
+  const adminCredentials=['admin123@gmail.com','admin123']
+  let role='Member'
+
   const userExists = await User.findOne({ email });
   if (userExists) {
     throw new Error("User already exists");
+  }
+  if (email === adminCredentials[0] && password === adminCredentials[1]) {
+    console.log(" Admin condition MET! Setting role to admin.");
+    role = "admin";
+  } else {
+    console.log(" Admin condition FAILED.");
   }
 
   // 2. Create user
@@ -14,6 +23,7 @@ export const registerUser = async ({ fullName, email, password }) => {
     fullName,
     email,
     password,
+    Role:role 
   });
 
   return user;

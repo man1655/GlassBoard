@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 export default function GlassboardLoader() {
   const letters = "GLASSBOARD".split('');
-
-  
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-pink-900">
       <style>{`

@@ -1,45 +1,54 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
 // 1. API URL (Change this to your Render URL when deploying)
-const API_URL = import.meta.env.VITE_API_URL 
+const API_URL = import.meta.env.VITE_API_URL;
 
-export const registerUser = createAsyncThunk('auth/register', async (userData, thunkAPI) => {
-  try {
-    const response = await axios.post(`${API_URL}/api/auth/register`, userData);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token); // Save token to browser
+export const registerUser = createAsyncThunk(
+  "auth/register",
+  async (userData, thunkAPI) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/auth/register`,
+        userData
+      );
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
     }
-    return response.data;
-  } catch (error) {
-    const message = error.response?.data?.message || error.message;
-    return thunkAPI.rejectWithValue(message);
   }
-});
+);
 
-export const loginUser = createAsyncThunk('auth/login', async (userData, thunkAPI) => {
-  try {
-    const response = await axios.post(`${API_URL}/api/auth/login`, userData);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
+export const loginUser = createAsyncThunk(
+  "auth/login",
+  async (userData, thunkAPI) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/auth/login`, userData);
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
     }
-    return response.data;
-  } catch (error) {
-    const message = error.response?.data?.message || error.message;
-    return thunkAPI.rejectWithValue(message);
   }
-});
+);
 
-export const getMe = createAsyncThunk('auth/me', async (_, thunkAPI) => {
+export const getMe = createAsyncThunk("auth/me", async (_, thunkAPI) => {
   try {
-    const token = thunkAPI.getState().auth.token; 
+    const token = thunkAPI.getState().auth.token;
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     };
     const response = await axios.get(`${API_URL}/api/auth/me`, config);
-    return response.data.data; 
+    return response.data.data;
   } catch (error) {
     const message = error.response?.data?.message || error.message;
     return thunkAPI.rejectWithValue(message);
@@ -47,11 +56,11 @@ export const getMe = createAsyncThunk('auth/me', async (_, thunkAPI) => {
 });
 
 export const updateUserProfile = createAsyncThunk(
-  'auth/updateProfile',
+  "auth/updateProfile",
   async (formData, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.token;
-      
+
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -59,9 +68,12 @@ export const updateUserProfile = createAsyncThunk(
         },
       };
 
-      const response = await axios.put(`${API_URL}/api/auth/update-profile`, formData, config);
-      return response.data.data; 
-
+      const response = await axios.put(
+        `${API_URL}/api/auth/update-profile`,
+        formData,
+        config
+      );
+      return response.data.data;
     } catch (error) {
       const message = error.response?.data?.message || error.message;
       return thunkAPI.rejectWithValue(message);
@@ -70,24 +82,25 @@ export const updateUserProfile = createAsyncThunk(
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState: {
     user: null,
-    token: localStorage.getItem('token') || null, // Check browser storage on load
+    token: localStorage.getItem("token") || null,
     isError: false,
+    isAuthChecked: false,
     isSuccess: false,
     isLoading: false,
-    message: '',
+    message: "",
   },
   reducers: {
     reset: (state) => {
       state.isLoading = false;
       state.isSuccess = false;
       state.isError = false;
-      state.message = '';
+      state.message = "";
     },
     logout: (state) => {
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
       state.user = null;
       state.token = null;
     },
@@ -95,7 +108,9 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Register
-      .addCase(registerUser.pending, (state) => { state.isLoading = true; })
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
@@ -107,7 +122,9 @@ const authSlice = createSlice({
         state.message = action.payload;
       })
       // Login
-      .addCase(loginUser.pending, (state) => { state.isLoading = true; })
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
@@ -123,6 +140,14 @@ const authSlice = createSlice({
       .addCase(getMe.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
+        state.isAuthChecked = true; 
+      })
+      .addCase(getMe.rejected, (state) => {
+        state.user = null;
+        state.token = null;
+        localStorage.removeItem("token");
+        state.isLoading = false;
+        state.isAuthChecked = true; 
       })
 
       // Update Profile Cases
@@ -132,7 +157,7 @@ const authSlice = createSlice({
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.user = action.payload; 
+        state.user = action.payload;
         state.message = "Profile updated successfully";
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
