@@ -80,6 +80,36 @@ export const updateUserProfile = createAsyncThunk(
     }
   }
 );
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async (userData, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.token;
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/changePassword`
+, // Adjust API URL
+        userData,
+        config
+      );
+
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: "auth",

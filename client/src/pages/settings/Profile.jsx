@@ -1,52 +1,73 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getMe, logout, reset, updateUserProfile } from '../../redux/slices/authSlice';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import GlassCard from '../../components/common/GlassCard';
-import { 
-  User, LogOut, Mail, MapPin, Phone, 
-  Camera, Edit2, Save, Tag
-} from 'lucide-react';
-import { notify } from '../../utils/notify';
-import GlassboardLoader from '../../components/common/LoadingScreen';
-import LogoutModal from '../../components/common/LogoutModel';
-import Navbar from '../../components/Navbar'; // ✅ Import Navbar for Standalone mode
+import React, { useEffect, useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getMe,
+  logout,
+  reset,
+  updateUserProfile,
+} from "../../redux/slices/authSlice";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import GlassCard from "../../components/common/GlassCard";
+import {
+  User,
+  LogOut,
+  Mail,
+  MapPin,
+  Phone,
+  Camera,
+  Edit2,
+  Save,
+  Tag,
+} from "lucide-react";
+import { notify } from "../../utils/notify";
+import GlassboardLoader from "../../components/common/LoadingScreen";
+import LogoutModal from "../../components/common/LogoutModel";
+import Navbar from "../../components/Navbar"; // ✅ Import Navbar for Standalone mode
+import ChangePasswordModal from "../../components/common/ChangePasswordModal";
 
 // ✅ Accept 'variant' prop to toggle themes
-const Profile = ({ variant = 'standalone' }) => {
-  const isDashboard = variant === 'dashboard'; // Check mode
+const Profile = ({ variant = "standalone" }) => {
+  const isDashboard = variant === "dashboard"; // Check mode
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
-  
-  const { user, isLoading, isError, message } = useSelector((state) => state.auth);
+
+  const { user, isLoading, isError, message } = useSelector(
+    (state) => state.auth
+  );
 
   // Local State
   const [isEditing, setIsEditing] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const [profileData, setProfileData] = useState({
-    bio: "", location: "", phone: "", tagline: ""
+    bio: "",
+    location: "",
+    phone: "",
+    tagline: "",
   });
 
   useEffect(() => {
     if (isError && message) notify.error(message);
-    
+
     if (!user) {
-        dispatch(getMe());
+      dispatch(getMe());
     } else {
-        setProfileData({
-            bio: user.bio || "",
-            location: user.location || "",
-            phone: user.phone || "",
-            tagline: user.tagline || ""
-        });
+      setProfileData({
+        bio: user.bio || "",
+        location: user.location || "",
+        phone: user.phone || "",
+        tagline: user.tagline || "",
+      });
     }
-    return () => { dispatch(reset()); };
+    return () => {
+      dispatch(reset());
+    };
   }, [dispatch, isError, message, user]);
 
   const onLogout = () => {
@@ -54,200 +75,317 @@ const Profile = ({ variant = 'standalone' }) => {
     dispatch(logout());
     dispatch(reset());
     notify.success("Logged Out User");
-    navigate('/');
+    navigate("/");
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      setImagePreview(URL.createObjectURL(file)); 
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
   const handleAvatarClick = () => {
     if (isEditing) fileInputRef.current.click();
-    if(!isEditing) notify.error("Click 'Edit Profile' to upload image");
+    if (!isEditing) notify.error("Click 'Edit Profile' to upload image");
   };
-  
+
   const handleSave = async () => {
     const formData = new FormData();
-    formData.append('bio', profileData.bio);
-    formData.append('location', profileData.location);
-    formData.append('phone', profileData.phone);
-    formData.append('tagline', profileData.tagline);
-    formData.append('fullName', user.fullName);
-    if (selectedFile) formData.append('avatar', selectedFile);
-    
+    formData.append("bio", profileData.bio);
+    formData.append("location", profileData.location);
+    formData.append("phone", profileData.phone);
+    formData.append("tagline", profileData.tagline);
+    formData.append("fullName", user.fullName);
+    if (selectedFile) formData.append("avatar", selectedFile);
+
     const result = await dispatch(updateUserProfile(formData));
 
     if (updateUserProfile.fulfilled.match(result)) {
-        setIsEditing(false);
-        setSelectedFile(null);
-        notify.success("Profile Updated Successfully!");
+      setIsEditing(false);
+      setSelectedFile(null);
+      notify.success("Profile Updated Successfully!");
     } else {
-        notify.error("Update failed: " + result.payload);
+      notify.error("Update failed: " + result.payload);
     }
   };
 
-  if (isLoading) return <GlassboardLoader/>;
+  if (isLoading) return <GlassboardLoader />;
 
   return (
-   
-    <div className={isDashboard ? "w-full relative" : "relative min-h-screen text-white p-6 md:p-12 overflow-hidden"}>
-      
-      
+    <div
+      className={
+        isDashboard
+          ? "w-full relative"
+          : "relative min-h-screen text-white p-6 md:p-12 overflow-hidden"
+      }
+    >
       {!isDashboard && (
         <>
-            <div className="bg-gradient-animate fixed inset-0 z-0" />
-            
+          <div className="bg-gradient-animate fixed inset-0 z-0" />
         </>
       )}
 
-      <div className="relative z-[100]"> 
-        <LogoutModal 
-          isOpen={showConfirm} 
+      <div className="relative z-[100]">
+        <LogoutModal
+          isOpen={showConfirm}
           onClose={() => setShowConfirm(false)}
           onConfirm={onLogout}
         />
       </div>
+      <div className="relative z-[100]">
+        {/* 3. Place the Modal Component here */}
+        <ChangePasswordModal
+          isOpen={showPasswordModal}
+          onClose={() => setShowPasswordModal(false)}
+        />
+
+        <LogoutModal />
+      </div>
 
       {user ? (
-        <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            
-            whileInView={{opacity:1,y:0}}
-            transition={{ duration: 0.7 }}
-           
-            className={`relative z-10 max-w-5xl mx-auto ${!isDashboard ? "pt-10" : ""}`}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          className={`relative z-10 max-w-5xl mx-auto ${
+            !isDashboard ? "pt-10" : ""
+          }`}
         >
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+            <div>
+              {!isDashboard && (
+                <Link to="/" className="inline-block mb-2 group">
+                  <h1 className="text-3xl font-bold tracking-tighter flex items-center gap-2 group-hover:scale-105 transition-transform">
+                    <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse" />
+                    GlassBoard.
+                  </h1>
+                </Link>
+              )}
+
+              <p className="text-blue-200/60 text-lg mt-1">
+                Manage your personal details and account preferences.
+              </p>
+            </div>
             
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
-                <div>
-                    {/* ✅ HIDE LOGO IN DASHBOARD (Sidebar has logo) */}
-                    {!isDashboard && (
-                        <Link to="/" className="inline-block mb-2 group">
-                            <h1 className="text-3xl font-bold tracking-tighter flex items-center gap-2 group-hover:scale-105 transition-transform">
-                                <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse" />
-                                GlassBoard.
-                            </h1>
-                        </Link>
+
+            {!isDashboard && (
+              <button
+                onClick={() => setShowConfirm(true)}
+                className="flex items-center gap-2 bg-red-500/10 text-red-200 px-4 py-2 rounded-xl border border-red-500/20 hover:bg-red-500 transition-all text-sm font-medium"
+              >
+                <LogOut size={18} /> Logout
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            <div className="lg:col-span-1">
+              <GlassCard className="p-0 overflow-hidden relative text-center h-full flex flex-col">
+                <div className="h-28 bg-gradient-to-r from-blue-600 to-purple-600 relative opacity-90" />
+                <div className="px-6 pb-8 relative -mt-14 flex-1 flex flex-col items-center">
+                  <div
+                    onClick={handleAvatarClick}
+                    className={`relative inline-block w-28 h-28 rounded-full border-[5px] border-[#0f172a] bg-blue-600 shadow-xl overflow-hidden ${
+                      isEditing ? "cursor-pointer hover:opacity-90" : ""
+                    } transition-all`}
+                  >
+                    {imagePreview ? (
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-white bg-zinc-800">
+                        {user.fullName?.charAt(0).toUpperCase()}
+                      </div>
                     )}
-                    
-                    {/* Dynamic Title */}
-                
-                    <p className="text-blue-200/60 text-lg mt-1">Manage your personal details and account preferences.</p>
+                    {isEditing && (
+                      <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white/90">
+                        <Camera className="w-8 h-8 mb-1" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">
+                          Upload
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    className="hidden"
+                    accept="image/*"
+                  />
+                  <h2 className="text-2xl font-bold mt-4">{user.fullName}</h2>
+                  <p className="text-blue-300/70 text-sm mb-6">{user.email}</p>
+
+                  <div className="w-full mt-auto">
+                    <div className="bg-white/5 rounded-xl p-4 border border-white/10 w-full shadow-inner">
+                      <label className="text-[10px] text-blue-200/50 uppercase tracking-widest font-bold flex items-center justify-center gap-1 mb-2">
+                        <Tag size={10} /> Status Tagline
+                      </label>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={profileData.tagline}
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              tagline: e.target.value,
+                            })
+                          }
+                          className="w-full bg-black/20 text-center text-sm border-b border-blue-500/50 focus:outline-none py-1 text-white italic"
+                          placeholder="Add a tagline..."
+                        />
+                      ) : (
+                        <p className="text-white font-medium italic">
+                          "{profileData.tagline || "Building Digital Dreams"}"
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                {!isDashboard && (
-                        <Link to="/" className="inline-block mb-2 group">
-                            <h1 className="text-3xl font-bold tracking-tighter flex items-center gap-2 group-hover:scale-105 transition-transform">
-                                <div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse" />
-                                GlassBoard.
-                            </h1>
-                        </Link>
-                    )}
-                {/* Logout Button */}
-                
-                <button onClick={()=>setShowConfirm(true)} className="flex items-center gap-2 bg-red-500/10 text-red-200 px-4 py-2 rounded-xl border border-red-500/20 hover:bg-red-500 transition-all text-sm font-medium">
-                    <LogOut size={18} /> Logout
-                </button>
+              </GlassCard>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-                
-                <div className="lg:col-span-1">
-                    <GlassCard className="p-0 overflow-hidden relative text-center h-full flex flex-col">
-                        <div className="h-28 bg-gradient-to-r from-blue-600 to-purple-600 relative opacity-90" />
-                        <div className="px-6 pb-8 relative -mt-14 flex-1 flex flex-col items-center">
-                            <div onClick={handleAvatarClick} className={`relative inline-block w-28 h-28 rounded-full border-[5px] border-[#0f172a] bg-blue-600 shadow-xl overflow-hidden ${isEditing ? 'cursor-pointer hover:opacity-90' : ''} transition-all`}>
-                                {imagePreview ? (
-                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                ) : user.avatar ? (
-                                    <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-white bg-zinc-800">
-                                        {user.fullName?.charAt(0).toUpperCase()}
-                                    </div>
-                                )}
-                                {isEditing && (
-                                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white/90">
-                                        <Camera className="w-8 h-8 mb-1" />
-                                        <span className="text-[10px] font-bold uppercase tracking-widest">Upload</span>
-                                    </div>
-                                )}
-                            </div>
-                            <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
-                            <h2 className="text-2xl font-bold mt-4">{user.fullName}</h2>
-                            <p className="text-blue-300/70 text-sm mb-6">{user.email}</p>
-
-                            <div className="w-full mt-auto">
-                                <div className="bg-white/5 rounded-xl p-4 border border-white/10 w-full shadow-inner">
-                                    <label className="text-[10px] text-blue-200/50 uppercase tracking-widest font-bold flex items-center justify-center gap-1 mb-2">
-                                        <Tag size={10} /> Status Tagline
-                                    </label>
-                                    {isEditing ? (
-                                        <input type="text" value={profileData.tagline} onChange={(e) => setProfileData({...profileData, tagline: e.target.value})} className="w-full bg-black/20 text-center text-sm border-b border-blue-500/50 focus:outline-none py-1 text-white italic" placeholder="Add a tagline..." />
-                                    ) : (
-                                        <p className="text-white font-medium italic">"{profileData.tagline || "Building Digital Dreams"}"</p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </GlassCard>
+            <div className="lg:col-span-2">
+              <GlassCard className="p-8 h-full flex flex-col">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <User className="text-blue-400" size={20} /> Personal
+                    Information
+                  </h3>
+                  <button
+                    onClick={() => setShowPasswordModal(true)} 
+                    className={`flex items-center ml-20 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      isEditing
+                        ? "bg-blue-600 hover:bg-blue-500 text-white"
+                        : "bg-white/10 hover:bg-white/20"
+                    }`}
+                  >
+                    {isEditing ? <>Save Changes</> : <>Change Password</>}
+                  </button>
+                  <button
+                    onClick={() =>
+                      isEditing ? handleSave() : setIsEditing(true)
+                    }
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      isEditing
+                        ? "bg-blue-600 hover:bg-blue-500 text-white"
+                        : "bg-white/10 hover:bg-white/20"
+                    }`}
+                  >
+                    {isEditing ? (
+                      <>
+                        <Save size={16} /> Save Changes
+                      </>
+                    ) : (
+                      <>
+                        <Edit2 size={16} /> Edit Profile
+                      </>
+                    )}
+                  </button>
                 </div>
-
-                {/* Right Col: Details Form */}
-                <div className="lg:col-span-2">
-                    <GlassCard className="p-8 h-full flex flex-col">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-bold flex items-center gap-2">
-                                <User className="text-blue-400" size={20} /> Personal Information
-                            </h3>
-                            <button onClick={() => isEditing ? handleSave() : setIsEditing(true)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${isEditing ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-white/10 hover:bg-white/20'}`}>
-                                {isEditing ? <><Save size={16} /> Save Changes</> : <><Edit2 size={16} /> Edit Profile</>}
-                            </button>
-                        </div>
-                        <div className="space-y-6 flex-1">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm text-blue-200/60 ml-1">Full Name</label>
-                                    <input type="text" disabled defaultValue={user.fullName} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white/70 cursor-not-allowed"/>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm text-blue-200/60 ml-1">Email</label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-4 top-3.5 text-blue-200/30 w-5 h-5" />
-                                        <input type="email" disabled defaultValue={user.email} className="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white/70 cursor-not-allowed"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm text-blue-200/60 ml-1">Bio</label>
-                                <textarea disabled={!isEditing} value={profileData.bio} onChange={(e) => setProfileData({...profileData, bio: e.target.value})} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:border-blue-500 focus:outline-none resize-none disabled:opacity-50" rows="3" placeholder="Tell us about yourself..." />
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm text-blue-200/60 ml-1">Location</label>
-                                    <div className="relative">
-                                        <MapPin className="absolute left-4 top-3.5 text-blue-200/30 w-5 h-5" />
-                                        <input disabled={!isEditing} value={profileData.location} onChange={(e) => setProfileData({...profileData, location: e.target.value})} className="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-3 focus:border-blue-500 focus:outline-none disabled:opacity-50" placeholder="City, Country" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm text-blue-200/60 ml-1">Phone</label>
-                                    <div className="relative">
-                                        <Phone className="absolute left-4 top-3.5 text-blue-200/30 w-5 h-5" />
-                                        <input disabled={!isEditing} value={profileData.phone} onChange={(e) => setProfileData({...profileData, phone: e.target.value})} className="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-3 focus:border-blue-500 focus:outline-none disabled:opacity-50" placeholder="+1 234 567 890" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </GlassCard>
+                <div className="space-y-6 flex-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm text-blue-200/60 ml-1">
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        disabled
+                        defaultValue={user.fullName}
+                        className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white/70 cursor-not-allowed"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-blue-200/60 ml-1">
+                        Email
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-3.5 text-blue-200/30 w-5 h-5" />
+                        <input
+                          type="email"
+                          disabled
+                          defaultValue={user.email}
+                          className="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white/70 cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-blue-200/60 ml-1">Bio</label>
+                    <textarea
+                      disabled={!isEditing}
+                      value={profileData.bio}
+                      onChange={(e) =>
+                        setProfileData({ ...profileData, bio: e.target.value })
+                      }
+                      className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:border-blue-500 focus:outline-none resize-none disabled:opacity-50"
+                      rows="3"
+                      placeholder="Tell us about yourself..."
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm text-blue-200/60 ml-1">
+                        Location
+                      </label>
+                      <div className="relative">
+                        <MapPin className="absolute left-4 top-3.5 text-blue-200/30 w-5 h-5" />
+                        <input
+                          disabled={!isEditing}
+                          value={profileData.location}
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              location: e.target.value,
+                            })
+                          }
+                          className="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-3 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                          placeholder="City, Country"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-blue-200/60 ml-1">
+                        Phone
+                      </label>
+                      <div className="relative">
+                        <Phone className="absolute left-4 top-3.5 text-blue-200/30 w-5 h-5" />
+                        <input
+                          disabled={!isEditing}
+                          value={profileData.phone}
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              phone: e.target.value,
+                            })
+                          }
+                          className="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-3 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                          placeholder="+1 234 567 890"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              </GlassCard>
             </div>
+          </div>
         </motion.div>
       ) : (
-        <div className="text-center mt-20 text-white/50">Please login to view profile.</div>
+        <div className="text-center mt-20 text-white/50">
+          Please login to view profile.
+        </div>
       )}
     </div>
   );
