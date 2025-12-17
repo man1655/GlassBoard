@@ -64,7 +64,7 @@ export const updateUserProfile = createAsyncThunk(
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
-          // detailed explanation: axios automatically sets Content-Type to multipart/form-data when it sees FormData
+          
         },
       };
 
@@ -117,7 +117,7 @@ const authSlice = createSlice({
     user: null,
     token: localStorage.getItem("token") || null,
     isError: false,
-    isAuthChecked: false,
+    isAuthChecked: !!localStorage.getItem("token"),
     isSuccess: false,
     isLoading: false,
     message: "",

@@ -101,12 +101,7 @@ const LandingPage = () => {
     { name: "Tailwind", icon: <LayoutDashboard /> },
     { name: "Framer", icon: <Activity /> },
   ];
-  const handleLogout = () => {
-    dispatch(logout());
-    dispatch(reset());
-    notify.success("User Logged Out ")
-    navigate('/');
-  };
+ 
 
   return (
     <div className="relative min-h-screen text-white selection:bg-blue-500 selection:text-white">

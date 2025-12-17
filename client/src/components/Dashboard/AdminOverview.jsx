@@ -34,7 +34,6 @@ const AdminOverview = ({ user }) => {
 
   return (
     <>
-  
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -51,15 +50,14 @@ const AdminOverview = ({ user }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-4 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8"
+        className="grid grid-cols-3 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8"
       >
         <StatCard icon={Users} label="Total Users" value={stats.totalUsers}  color="blue" />
         <StatCard icon={UserPlus} label="New Signups Today" value={stats.newSignup}  color="purple" />
         <StatCard icon={Activity} label="Active Sessions" value={stats.activeSessions}  color="green" />
       </motion.div>
 
-      {/* Charts & Logs Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-1 ">
          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="lg:col-span-2">
             <GlassCard className="p-8 h-full min-h-[450px] flex flex-col">
                <div className="flex justify-between items-center mb-8">

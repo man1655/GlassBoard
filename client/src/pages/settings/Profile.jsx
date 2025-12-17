@@ -135,7 +135,6 @@ const Profile = ({ variant = "standalone" }) => {
         />
       </div>
       <div className="relative z-[100]">
-        {/* 3. Place the Modal Component here */}
         <ChangePasswordModal
           isOpen={showPasswordModal}
           onClose={() => setShowPasswordModal(false)}
@@ -266,12 +265,10 @@ const Profile = ({ variant = "standalone" }) => {
                   <button
                     onClick={() => setShowPasswordModal(true)} 
                     className={`flex items-center ml-20 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      isEditing
-                        ? "bg-blue-600 hover:bg-blue-500 text-white"
-                        : "bg-white/10 hover:bg-white/20"
+                    "bg-white/10 hover:bg-white/20"
                     }`}
                   >
-                    {isEditing ? <>Save Changes</> : <>Change Password</>}
+                     Change Password
                   </button>
                   <button
                     onClick={() =>

@@ -27,7 +27,11 @@ const userSchema = new mongoose.Schema(
       minlength: [8, "Password Must Be Greater Than 8 Character"],
       select: false,
     },
-    // --- 2. PROFILE DATA (BE-10) ---
+     status: {
+      type: String,
+      enum: ["active", "inactive", "banned"],
+      default: "active",
+    },
     Role: {
       type: String,
       default:'Member'
@@ -44,7 +48,6 @@ const userSchema = new mongoose.Schema(
     location: { type: String, default: "" },
   phone: { type: String, default: "" },
   tagline: { type: String, default: "" },
-    // --- 3. PASSWORD RESET (Future Proofing) ---
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },

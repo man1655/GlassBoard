@@ -75,8 +75,7 @@ const dashboardSlice = createSlice({
       })
       // --- Chart Cases ---
       .addCase(fetchDashboardChart.pending, (state) => {
-        // We don't strictly need to set loading true again if stats is already loading
-        // but it's safe to keep it consistent
+        
         state.isLoading = true;
       })
       .addCase(fetchDashboardChart.fulfilled, (state, action) => {
