@@ -30,7 +30,7 @@ const Navbar = () => {
     if (user) {
       dispatch(getNotifications());
     }
-  }, [dispatch, user]);
+  }, [dispatch, user,notifications]);
 
   // 3. Add Click Outside Logic
   useEffect(() => {
@@ -130,7 +130,6 @@ const Navbar = () => {
                     )}
                   </button>
 
-                  {/* Dropdown Menu */}
                   {showDropdown && (
                     <div className="absolute right-0 mt-3 w-80 bg-[#0f172a]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
                       <div className="p-3 border-b border-white/10 bg-white/5 flex justify-between items-center">
