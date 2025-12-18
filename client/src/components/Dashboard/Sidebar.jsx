@@ -52,7 +52,7 @@ const Sidebar = () => {
     {
       icon: FileText,
       label: "Activity Logs",
-      path: "/dashboard/logs",
+      path: "/dashboard/audit",
       allowedRoles: ["admin"],
     },
     {
