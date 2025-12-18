@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   Search,
   Plus,
-  Filter, // Kept for the label
+  Filter,
   MoreVertical,
   Trash2,
   Edit,
@@ -13,8 +13,8 @@ import {
   UserCheck,
   UserX,
   Mail,
-  ChevronDown, // Added
-  X, // Added
+  ChevronDown,
+  X,
 } from "lucide-react";
 
 // Components
@@ -24,27 +24,37 @@ import UserModal from "./UserModal";
 import GlassboardLoader from "../../common/LoadingScreen";
 
 // Redux Actions
-import { fetchUsers, fetchUserStats } from "../../../redux/slices/userSlice";
+import {
+  deleteUser,
+  fetchUsers,
+  fetchUserStats,
+} from "../../../redux/slices/userSlice";
+import { notify } from "../../../utils/notify";
+import DeleteModel from "../../common/DeleteModel";
+import DashboardLoader from "../../common/DashboardLoader";
+import UpdateUserModal from "../../../pages/dashboard/UpdateModel";
 
 const UserList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [updateModel, setUpdateModel] = useState(false);
   const [page, setPage] = useState(1);
   const [role, setRole] = useState("");
   const [status, setStatus] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const dispatch = useDispatch();
 
-  // Fetch Data
   useEffect(() => {
     dispatch(fetchUsers({ page, Role: role, status }));
     dispatch(fetchUserStats());
   }, [dispatch, page, role, status]);
 
-  // Get State
   const {
     list: users = [],
-    stats = { total: 0, active: 0, banned: 0 },
+    stats = { total: 0, active: 0, banned: 0, inactive: 0 },
     pagination = {
       page: 1,
       totalPage: 1,
@@ -54,11 +64,30 @@ const UserList = () => {
     loading = false,
   } = useSelector((state) => state.users || {});
 
-  if (loading) return <GlassboardLoader />;
+  const handleDelete = async () => {
+    if (!selectedUserId) return;
+
+    setShowConfirm(false);
+    const result = await dispatch(deleteUser(selectedUserId));
+    if (deleteUser.fulfilled.match(result)) {
+      notify.success("User deactivated successfully!");
+      dispatch(fetchUsers({ page, Role: role, status }));
+      dispatch(fetchUserStats());
+    } else {
+      notify.error(result.payload || "Failed to delete user");
+    }
+    setSelectedUserId(null);
+  };
+
+  if (loading) return <DashboardLoader />;
 
   return (
     <>
-      {/* 1. Page Header */}
+      <DeleteModel
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleDelete}
+      />
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -107,7 +136,7 @@ const UserList = () => {
         <StatCard
           icon={UserX}
           label="Banned / Inactive"
-          value={stats.banned}
+          value={stats.banned + stats.inactive}
           trend={-2}
           color="red"
         />
@@ -121,7 +150,6 @@ const UserList = () => {
         className="mb-6"
       >
         <GlassCard className="p-4 flex flex-col xl:flex-row gap-4 items-center justify-between">
-          
           {/* Search Bar */}
           <div className="relative w-full xl:w-96 group">
             <Search
@@ -138,13 +166,14 @@ const UserList = () => {
 
           {/* New Filters Design */}
           <div className="flex flex-wrap gap-3 items-center bg-white/5 p-1.5 rounded-2xl border border-white/5 backdrop-blur-sm w-full xl:w-auto">
-            
             {/* Filter Label */}
             <div className="px-3 text-blue-200/50 hidden md:flex items-center gap-2">
-               <Filter size={16} />
-               <span className="text-xs font-bold uppercase tracking-wider">Filters</span>
+              <Filter size={16} />
+              <span className="text-xs font-bold uppercase tracking-wider">
+                Filters
+              </span>
             </div>
-            
+
             <div className="h-6 w-px bg-white/10 hidden md:block"></div>
 
             {/* ROLE FILTER */}
@@ -153,15 +182,24 @@ const UserList = () => {
                 value={role}
                 onChange={(e) => {
                   setRole(e.target.value);
-                  setPage(1)
+                  setPage(1);
                 }}
                 className="w-full md:w-32 appearance-none pl-4 pr-10 py-2 text-sm font-medium text-white bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all hover:bg-white/10 cursor-pointer"
               >
-                <option value="" className="bg-[#0f172a] text-gray-400">All Roles</option>
-                <option value="admin" className="bg-[#0f172a]">Admin</option>
-                <option value="Member" className="bg-[#0f172a]">Member</option>
+                <option value="" className="bg-[#0f172a] text-gray-400">
+                  All Roles
+                </option>
+                <option value="admin" className="bg-[#0f172a]">
+                  Admin
+                </option>
+                <option value="Member" className="bg-[#0f172a]">
+                  Member
+                </option>
               </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none group-hover:text-white transition-colors" />
+              <ChevronDown
+                size={14}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none group-hover:text-white transition-colors"
+              />
             </div>
 
             {/* STATUS FILTER */}
@@ -169,35 +207,42 @@ const UserList = () => {
               <select
                 value={status}
                 onChange={(e) => {
-                  setStatus(e.target.value)
-                  setPage(1)
-                }
-                }
+                  setStatus(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full md:w-32 appearance-none pl-4 pr-10 py-2 text-sm font-medium text-white bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all hover:bg-white/10 cursor-pointer "
               >
-                <option value="" className="bg-[#0f172a] text-gray-400">All Status</option>
-                <option value="active" className="bg-[#0f172a]">Active</option>
-                <option value="banned" className="bg-[#0f172a]">Banned</option>
+                <option value="" className="bg-[#0f172a] text-gray-400">
+                  All Status
+                </option>
+                <option value="active" className="bg-[#0f172a]">
+                  Active
+                </option>
+                <option value="banned" className="bg-[#0f172a]">
+                  Banned
+                </option>
               </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none group-hover:text-white transition-colors" />
+              <ChevronDown
+                size={14}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none group-hover:text-white transition-colors"
+              />
             </div>
 
             {/* CLEAR BUTTON */}
             {(role || status) && (
-                <button
-                  onClick={() => {
-                    setRole("");
-                    setStatus("");
-                    setPage(1);
-                  }}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-300 hover:text-white bg-red-500/10 hover:bg-red-500 rounded-xl border border-red-500/20 transition-all"
-                >
-                  <X size={14} />
-                  <span className="hidden sm:inline">Reset</span>
-                </button>
+              <button
+                onClick={() => {
+                  setRole("");
+                  setStatus("");
+                  setPage(1);
+                }}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-300 hover:text-white bg-red-500/10 hover:bg-red-500 rounded-xl border border-red-500/20 transition-all"
+              >
+                <X size={14} />
+                <span className="hidden sm:inline">Reset</span>
+              </button>
             )}
           </div>
-
         </GlassCard>
       </motion.div>
 
@@ -228,7 +273,7 @@ const UserList = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: index * 0.05 }}
-                      key={user._id || user.id} 
+                      key={user._id || user.id}
                       className="hover:bg-white/[0.02] transition-colors group"
                     >
                       <td className="p-6">
@@ -257,7 +302,10 @@ const UserList = () => {
                         >
                           {user.role === "admin" && <Shield size={10} />}
                           {/* Safe Capitalization */}
-                          {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "Member"}
+                          {user.role
+                            ? user.role.charAt(0).toUpperCase() +
+                              user.role.slice(1)
+                            : "Member"}
                         </span>
                       </td>
 
@@ -287,9 +335,21 @@ const UserList = () => {
                       <td className="p-6 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors border border-transparent hover:border-white/5">
-                            <Edit size={16} />
+                            <Edit
+                              onClick={() => {
+                                setUpdateModel(true);
+                                setSelectedUser(user);
+                              }}
+                              size={16}
+                            />
                           </button>
-                          <button className="p-2 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/10">
+                          <button
+                            onClick={() => {
+                              setShowConfirm(true);
+                              setSelectedUserId(user._id);
+                            }}
+                            className="p-2 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/10"
+                          >
                             <Trash2 size={16} />
                           </button>
                         </div>
@@ -329,8 +389,17 @@ const UserList = () => {
           </div>
         </GlassCard>
       </motion.div>
-
-      {/* Modal */}
+      <UpdateUserModal
+        isOpen={updateModel}
+        user={selectedUser}
+        onClose={() => {
+          setUpdateModel(false);
+          setSelectedUser(null);
+        }}
+        onUpdateSuccess={() =>
+          dispatch(fetchUsers({ page, Role: role, status }))
+        }
+      />
       <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );

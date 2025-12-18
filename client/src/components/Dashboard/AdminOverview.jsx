@@ -12,6 +12,7 @@ import { fetchDashboardStats, fetchDashboardChart } from '../../redux/slices/das
 import { useDispatch, useSelector } from 'react-redux';
 import GlassboardLoader from '../common/LoadingScreen';
 import DashboardSkeleton from './DashboardSkeleton';
+import DashboardLoader from '../common/DashboardLoader';
 
 const AdminOverview = ({ user }) => {
  
@@ -31,6 +32,9 @@ const AdminOverview = ({ user }) => {
     return <DashboardSkeleton />;
   }
   
+  if(isLoading){
+    return <DashboardLoader/>
+  }
 
   return (
     <>

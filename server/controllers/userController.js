@@ -1,4 +1,4 @@
-import { deleteUserService, getUsersServices, getUserStatsService, updateUserService } from "../services/userServices.js";
+import { addUserService, deleteUserService, getUsersServices, getUserStatsService, updateUserService } from "../services/userServices.js";
 
 export const getUserStats = async (req, res) => {
   try {
@@ -57,12 +57,13 @@ export const getUsers = async (req, res) => {
   }
 };
 
-export const deleteUser = async (req, res) => {
+export const deleteUser= async (req, res) => {
   try {
-    await deleteUserService(req.params.id);
+    const user=await deleteUserService(req.params.id);
 
     res.status(200).json({
       success: true,
+      data:user,
       message: "User deleted successfully",
     });
   } catch (error) {
@@ -72,3 +73,19 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+
+export const addUser = async (req, res) => {
+  try {
+    await addUserService({data:req.body});
+    res.status(200).json({
+      success: true,
+      message: "User created successfully",
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
