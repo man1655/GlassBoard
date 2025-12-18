@@ -10,5 +10,6 @@ export const store = configureStore({
     notifications: notificationReducer,
     dashboard: dashboardReducer,
     users:userReducer,
+    notification: notificationReducer,
   },
 });
