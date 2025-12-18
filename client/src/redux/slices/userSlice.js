@@ -59,7 +59,7 @@ export const updateUser = createAsyncThunk(
         data,
         config
       );
-      return response.data;
+      return response.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || error.message
@@ -73,14 +73,43 @@ export const deleteUser = createAsyncThunk(
   async (id, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.token;
+      
+console.log("DELETE TOKEN:", token);
+
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/admin/users/${id}`,  
+        {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      return response.data.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || error.message
+      );
+    }
+  }
+);
+
+
+
+
+
+export const addUser = createAsyncThunk(
+  "users/add",
+  async (userData, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.token;
       const config = {
         headers: { Authorization: `Bearer ${token}` },
       };
-      const response = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/admin/users/${id}`,
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/admin/users`,userData, 
         config
       );
-      return id;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || error.message
@@ -97,6 +126,7 @@ const userSlice = createSlice({
       total: 0,
       active: 0,
       banned: 0,
+      inactive:0,
       null: 0,
     },
     pagination: {
@@ -136,13 +166,13 @@ const userSlice = createSlice({
       // UPDATE
       .addCase(updateUser.fulfilled, (state, action) => {
         state.list = state.list.map((user) =>
-          user._id === action.payload.data._id ? action.payload.data : user
+          user._id === action.payload._id ? action.payload: user
         );
       })
 
       // DELETE
       .addCase(deleteUser.fulfilled, (state, action) => {
-        state.list = state.list.filter((user) => user._id !== action.payload);
+        state.list = state.list.filter((user) => user._id !== action.payload._id);
       });
   },
 });

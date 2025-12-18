@@ -1,4 +1,4 @@
-import User from "../model/User.js"
+import User from "../model/User.js";
 
 export const getUserStatsService = async () => {
   const stats = await User.aggregate([
@@ -16,6 +16,7 @@ export const getUserStatsService = async () => {
     total,
     active: 0,
     banned: 0,
+    inactive: 0,
   };
 
   stats.forEach((item) => {
@@ -25,11 +26,16 @@ export const getUserStatsService = async () => {
   return result;
 };
 
-export const getUsersServices=async({page,limit,search,Role,status})=>{
+export const getUsersServices = async ({
+  page,
+  limit,
+  search,
+  Role,
+  status,
+}) => {
+  const query = {};
 
-  const query={}
-
-  if(search){
+  if (search) {
     query.$or = [
       { fullName: { $regex: search, $options: "i" } },
       { email: { $regex: search, $options: "i" } },
@@ -40,49 +46,75 @@ export const getUsersServices=async({page,limit,search,Role,status})=>{
   }
 
   if (status) {
-    query.status = status;
+    query.status = status; // active | inactive | banned
+  } else {
+    query.status = "active"; // DEFAULT
   }
-  const skip=(page-1)*limit;
-  const users=await User.find(query)
-  .select("fullName email Role status createdAt").
-  skip(skip)
-  .limit(limit).
-  sort({createdAt:-1})
+  const skip = (page - 1) * limit;
+  const users = await User.find(query)
+    .select("fullName email Role status createdAt")
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 });
 
-  const totalUsers=await User.countDocuments(query);
+  const totalUsers = await User.countDocuments(query);
 
   return {
     users,
-    pagination:{
+    pagination: {
       page,
-      totalPage:Math.ceil(totalUsers/limit),
+      totalPage: Math.ceil(totalUsers / limit),
       limit,
-      totalUsers
-    }
-  }
+      totalUsers,
+    },
+  };
+};
 
-}
+export const updateUserService = async ({ userId, data }) => {
+  const allowedFields = ["Role", "status"];
+  const updates = {};
 
-export const updateUserService=async({userId,data})=>{
-  const allowedFields=['Role','status']
-  const updates={}
-   allowedFields.forEach((field) => {
+  allowedFields.forEach((field) => {
     if (data[field] !== undefined) {
       updates[field] = data[field];
     }
   });
-  const users=await User.findByIdAndUpdate(
-    userId,updates,{
-      new:true,
-      runValidators:true,
-    }  
-  )
-  if (!users) throw new Error("User not found");
-  return users;
-}
 
-export const deleteUserService=async(userId)=>{
-  const users=await User.findByIdAndDelete(userId);
-  if (!users) throw new Error("User not found");
+  if (Object.keys(updates).length === 0) {
+    throw new Error("No valid fields provided for update");
+  }
+
+  const user = await User.findOneAndUpdate(
+    { _id: userId, status: { $ne: "inactive" } },
+    updates,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!user) {
+    throw new Error("User not found or inactive");
+  }
+
+  return user;
+};
+
+export const deleteUserService = async (userId) => {
+  const user = await User.findOneAndUpdate(
+    { _id: userId, status: "active" },
+    { status: "inactive" },
+    { new: true }
+  );
+
+  if (!user) {
+    throw new Error("User not found or already inactive");
+  }
+
+  return user;
+};
+
+export const addUserService = async ({ data }) => {
+  const users = await User.create(data);
   return users;
-}
+};

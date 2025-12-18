@@ -9,7 +9,6 @@ const Router=express.Router();
 
 Router.use('/auth',authRoutes)
 Router.use('/user',dashRoutes)
-// Router.use("/notifications", notificationRoutes);
 Router.use('/admin',userRoutes)
 
 
