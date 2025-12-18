@@ -30,7 +30,7 @@ const DeleteModel = ({ isOpen, onClose, onConfirm }) => {
             onClick={onConfirm}
             className="px-5 py-2.5 text-sm font-medium bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-xl shadow-lg shadow-red-600/20 transition-all"
           >
-            Yes, Delete User
+            Yes, Delete 
           </button>
         </div>
 

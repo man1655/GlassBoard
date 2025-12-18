@@ -8,6 +8,7 @@ import {
   LogOut,
   ShieldCheck,
   Zap,
+  Bell,
 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,6 +42,13 @@ const Sidebar = () => {
       path: "/dashboard/users",
       allowedRoles: ["admin"],
     },
+  
+    {
+      icon: Bell,
+      label: "Notifications",
+      path: "/dashboard/notification",
+      allowedRoles: ["admin"],
+    },
     {
       icon: FileText,
       label: "Activity Logs",
@@ -50,7 +58,7 @@ const Sidebar = () => {
     {
       icon: Settings,
       label: "Settings",
-      path: "profile",
+      path: "/dashboard/profile",
       allowedRoles: ["admin", "Member"],
     },
   ];
@@ -60,7 +68,7 @@ const Sidebar = () => {
   }, [userRole]);
 
   const handleLogout = () => {
-    setShowLogoutModal(false); // Close modal
+    setShowLogoutModal(false);
     dispatch(logout());
     dispatch(reset());
     notify.success("Logged out successfully!");

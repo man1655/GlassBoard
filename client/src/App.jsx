@@ -12,6 +12,7 @@
   import UserList from "./components/Dashboard/User/UserList";
   import DashboardLayout from "./components/Dashboard/DashboardLayout";
 import ProtectedRoute from "./hooks/ProtectedRoute";
+import NotificationList from "./components/Dashboard/Notification/NotificationList";
 
   function App() {
     const dispatch = useDispatch();
@@ -29,12 +30,14 @@ import ProtectedRoute from "./hooks/ProtectedRoute";
             <Route path="/" element={<LandingPage />}></Route>
             <Route path="/login" element={<Login />}></Route>
             <Route path="/register" element={<Register />}></Route>
+
             <Route element={<ProtectedRoute />}>
               <Route path="/profile" element={<Profile variant="standalone" />} />{" "}
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<Dashboard />} />{" "}
                 <Route path="profile" element={<Profile variant="dashboard" />} />{" "}
                 <Route path="users" element={<UserList />} />{" "}
+                <Route path='notification'element={<NotificationList/>}/>{""}
               </Route>
             </Route>
           </Routes>
