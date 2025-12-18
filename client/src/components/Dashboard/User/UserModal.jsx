@@ -4,7 +4,7 @@ import { X, User, Mail, Shield, Lock } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../../../redux/slices/userSlice";
 
-const UserModal = ({ isOpen, onClose }) => {
+const UserModal = ({ isOpen, onClose,onSuccess}) => {
   if (!isOpen) return null;
   const dispatch=useDispatch();
   const { loading } = useSelector((state) => state.users);
@@ -32,6 +32,7 @@ const UserModal = ({ isOpen, onClose }) => {
   dispatch(addUser(formData))
     .unwrap()
     .then(() => {
+      onSuccess();
       onClose();
     })
     .catch((err) => {

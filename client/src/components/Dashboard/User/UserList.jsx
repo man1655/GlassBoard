@@ -400,7 +400,10 @@ const UserList = () => {
           dispatch(fetchUsers({ page, Role: role, status }))
         }
       />
-      <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSuccess={() => {
+    dispatch(fetchUsers({ page, Role: role, status }));
+    dispatch(fetchUserStats());
+  }} />
     </>
   );
 };
