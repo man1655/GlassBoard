@@ -13,6 +13,7 @@
   import DashboardLayout from "./components/Dashboard/DashboardLayout";
 import ProtectedRoute from "./hooks/ProtectedRoute";
 import NotificationList from "./components/Dashboard/Notification/NotificationList";
+import ActivityLogs from "./pages/dashboard/ActivityLogs";
 
   function App() {
     const dispatch = useDispatch();
@@ -32,12 +33,13 @@ import NotificationList from "./components/Dashboard/Notification/NotificationLi
             <Route path="/register" element={<Register />}></Route>
 
             <Route element={<ProtectedRoute />}>
-              <Route path="/profile" element={<Profile variant="standalone" />} />{" "}
+              <Route path="/profile" element={<Profile variant="standalone" />} />
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<Dashboard />} />{" "}
-                <Route path="profile" element={<Profile variant="dashboard" />} />{" "}
+                <Route path="profile" element={<Profile variant="dashboard" />} />
                 <Route path="users" element={<UserList />} />{" "}
-                <Route path='notification'element={<NotificationList/>}/>{""}
+                <Route path='audit' element={<ActivityLogs/>}/>
+                <Route path='notification'element={<NotificationList/>}/>
               </Route>
             </Route>
           </Routes>
