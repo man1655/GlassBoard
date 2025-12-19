@@ -17,7 +17,7 @@ app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api',routes)
 
-connectDB();
+connectDB(); 
 
 app.get('/', (req, res) => {
     res.json({ message: "Backend is LIVE on Render!" });

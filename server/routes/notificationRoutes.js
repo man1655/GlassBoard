@@ -1,7 +1,12 @@
-import express from 'express';
-import { createNotification, deleteNotification, getNotification, updateNotification } from '../controllers/notificationController.js';
-import { protect } from '../middleware/authMiddleware.js';
-import { authorizeAdmin } from '../middleware/roleMiddleware.js';
+import express from "express";
+import {
+  createNotification,
+  deleteNotification,
+  getNotification,
+  updateNotification,
+} from "../controllers/notificationController.js";
+import { protect } from "../middleware/authMiddleware.js";
+import { authorizeAdmin } from "../middleware/roleMiddleware.js";
 
 const Router = express.Router();
 
@@ -12,7 +17,6 @@ const Router = express.Router();
  *     description: Managing user alerts
  */
 
-
 /**
  * @swagger
  * /api/notification:
@@ -21,10 +25,21 @@ const Router = express.Router();
  *     tags: [Notifications]
  *     responses:
  *       200:
- *         description: Success - Returns list of notifications
- *
+ *         description: List of notifications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Notification'
+ */
+Router.get("/", getNotification);
+
+/**
+ * @swagger
+ * /api/notification:
  *   post:
- *     summary: Create a notification 
+ *     summary: Create a notification
  *     tags: [Notifications]
  *     security:
  *       - bearerAuth: []
@@ -37,20 +52,29 @@ const Router = express.Router();
  *             required:
  *               - title
  *               - message
+ *               - type
  *             properties:
  *               title:
  *                 type: string
+ *                 example: New Feature Released
  *               message:
  *                 type: string
+ *                 example: We just launched dark mode 🎉
+ *               type:
+ *                 type: string
+ *                 enum: [info, warning, success, error]
+ *                 example: success
  *     responses:
  *       201:
  *         description: Notification created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Notification'
  */
 
-
 // Routes
-Router.get('/', getNotification);
-Router.post('/', protect, authorizeAdmin, createNotification);
+Router.post("/", protect, authorizeAdmin, createNotification);
 
 /**
  * @swagger
@@ -66,7 +90,7 @@ Router.post('/', protect, authorizeAdmin, createNotification);
  *         required: true
  *         schema:
  *           type: string
- *         description: The notification ID
+ *         description: Notification ID
  *     requestBody:
  *       required: true
  *       content:
@@ -78,10 +102,23 @@ Router.post('/', protect, authorizeAdmin, createNotification);
  *                 type: string
  *               message:
  *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [info, warning, success, error]
  *     responses:
  *       200:
- *         description: Updated successfully
- *
+ *         description: Notification updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Notification'
+ */
+
+Router.put("/:id", protect, authorizeAdmin, updateNotification);
+
+/**
+ * @swagger
+ * /api/notification/{id}:
  *   delete:
  *     summary: Delete a notification
  *     tags: [Notifications]
@@ -93,14 +130,11 @@ Router.post('/', protect, authorizeAdmin, createNotification);
  *         required: true
  *         schema:
  *           type: string
- *         description: The notification ID
  *     responses:
  *       200:
- *         description: Deleted successfully
+ *         description: Notification deleted successfully
  */
 
-
-Router.put('/:id', protect, authorizeAdmin, updateNotification);
-Router.delete('/:id', protect, authorizeAdmin, deleteNotification);
+Router.delete("/:id", protect, authorizeAdmin, deleteNotification);
 
 export default Router;
