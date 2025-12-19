@@ -19,11 +19,12 @@ import {
   Edit2,
   Save,
   Tag,
+  Pencil,
 } from "lucide-react";
 import { notify } from "../../utils/notify";
 import GlassboardLoader from "../../components/common/LoadingScreen";
 import LogoutModal from "../../components/common/LogoutModel";
-import Navbar from "../../components/Navbar"; // ✅ Import Navbar for Standalone mode
+import Navbar from "../../components/Navbar"; 
 import ChangePasswordModal from "../../components/common/ChangePasswordModal";
 import DashboardLoader from "../../components/common/DashboardLoader";
 
@@ -180,12 +181,12 @@ const Profile = ({ variant = "standalone" }) => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             <div className="lg:col-span-1">
-              <GlassCard className="p-0 overflow-hidden relative text-center h-full flex flex-col">
+              <GlassCard className="p-0 overflow-hidden  relative text-center h-full flex flex-col">
                 <div className="h-28 bg-gradient-to-r from-blue-600 to-purple-600 relative opacity-90" />
                 <div className="px-6 pb-8 relative -mt-14 flex-1 flex flex-col items-center">
                   <div
                     onClick={handleAvatarClick}
-                    className={`relative inline-block w-28 h-28 rounded-full border-[5px] border-[#0f172a] bg-blue-600 shadow-xl overflow-hidden ${
+                    className={` group relative inline-block w-28 h-28 rounded-full border-[5px] border-[#0f172a] bg-blue-600 shadow-xl overflow-hidden ${
                       isEditing ? "cursor-pointer hover:opacity-90" : ""
                     } transition-all`}
                   >
@@ -207,11 +208,8 @@ const Profile = ({ variant = "standalone" }) => {
                       </div>
                     )}
                     {isEditing && (
-                      <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white/90">
-                        <Camera className="w-8 h-8 mb-1" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">
-                          Upload
-                        </span>
+                      <div className="absolute inset-0  bg-black/50 opacity-0  group-hover:opacity-100 flex flex-col items-center justify-center text-white/90">
+                        <Pencil  className="w-8 h-8" />
                       </div>
                     )}
                   </div>

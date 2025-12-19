@@ -30,6 +30,7 @@ import { logout, reset, getMe } from '../redux/slices/authSlice';
 import { notify } from "../utils/notify";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { FaGithub } from "react-icons/fa";
 
 // ... (Keep your animation variants here) ...
 const containerVariants = {
@@ -142,7 +143,7 @@ const LandingPage = () => {
                 </button>
                 
                 <a href="https://github.com/man1655/GlassBoard" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-transparent border border-white/30 hover:bg-white/10 rounded-full transition-all text-white font-medium flex items-center gap-2">
-                  <Github className="w-5 h-5" /> View Source Code
+                  <FaGithub className="w-5 h-5" /> View Source Code
                 </a>
               </div>
             </motion.div>
