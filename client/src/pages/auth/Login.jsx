@@ -10,7 +10,6 @@ import { notify } from '../../utils/notify';
 const Login = () => {
   const navigate = useNavigate();
  
-  // const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const dispatch = useDispatch();
 
@@ -35,6 +34,9 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if(formData.password.length<8){
+      return notify.error("Password Must Be Greater Than 8 Characters")
+    }
     dispatch(loginUser(formData))
   };
 

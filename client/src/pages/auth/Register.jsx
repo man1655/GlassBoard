@@ -23,14 +23,13 @@ const Register = () => {
   
   const [customError, setCustomError] = useState('');
 
-  // 3. Get global state from Redux
   const { user, isLoading, isError, isSuccess, message } = useSelector(
     (state) => state.auth
   );
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setCustomError(''); // Clear error when user types
+    setCustomError(''); 
   };
 
   useEffect(() => {
@@ -48,6 +47,10 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (formData.password.length < 8) {
+      notify.error("Password Must Be Greater Than 8 Characters")
+      return;
+    }
     
     if (formData.password !== formData.confirmPassword) {
       notify.error("Password And Confirm Password Should Be Same")
