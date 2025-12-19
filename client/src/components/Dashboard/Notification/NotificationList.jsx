@@ -260,7 +260,6 @@ const NotificationList = () => {
           })}
         </AnimatePresence>
 
-        {/*  State */}
         {!isLoading && filteredNotifications.length === 0 && (
           <div className="col-span-full py-20 text-center flex flex-col items-center justify-center">
              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">

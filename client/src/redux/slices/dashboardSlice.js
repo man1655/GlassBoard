@@ -38,6 +38,24 @@ export const fetchDashboardChart = createAsyncThunk(
   }
 );
 
+export const fetchLogs=createAsyncThunk(
+  'dashboard/fetchLogs',
+  async(_,thunkAPI)=>{
+    try{
+      const token=thunkAPI.getState().auth.token;
+      const config={
+        headers:{Authorization:`Bearer ${token}`}
+      }
+      const response=await axios.get(`${API_URL}/api/log/log`,config)
+      return response.data;
+
+    }catch(error){
+      const message = error.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState: {
@@ -47,6 +65,7 @@ const dashboardSlice = createSlice({
       activeSessions: 0,
     },
     chartData: [],
+    logs:[],
     isLoading: true,
     isError: false,
     message: '',
@@ -86,7 +105,21 @@ const dashboardSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
-      });
+      })
+
+      .addCase(fetchLogs.pending, (state) => {
+        state.isLoading = true;
+    })
+    .addCase(fetchLogs.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // FIX: Access .data to get the array
+        state.logs = action.payload.data; 
+    })
+    .addCase(fetchLogs.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+    });
   },
 });
 

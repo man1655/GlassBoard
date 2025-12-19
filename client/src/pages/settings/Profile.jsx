@@ -25,10 +25,10 @@ import GlassboardLoader from "../../components/common/LoadingScreen";
 import LogoutModal from "../../components/common/LogoutModel";
 import Navbar from "../../components/Navbar"; // ✅ Import Navbar for Standalone mode
 import ChangePasswordModal from "../../components/common/ChangePasswordModal";
+import DashboardLoader from "../../components/common/DashboardLoader";
 
-// ✅ Accept 'variant' prop to toggle themes
 const Profile = ({ variant = "standalone" }) => {
-  const isDashboard = variant === "dashboard"; // Check mode
+  const isDashboard = variant === "dashboard"; 
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -38,7 +38,6 @@ const Profile = ({ variant = "standalone" }) => {
     (state) => state.auth
   );
 
-  // Local State
   const [isEditing, setIsEditing] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -111,7 +110,7 @@ const Profile = ({ variant = "standalone" }) => {
     }
   };
 
-  if (isLoading) return <GlassboardLoader />;
+  if (isLoading) return <DashboardLoader />;
 
   return (
     <div

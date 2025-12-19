@@ -70,7 +70,7 @@
     name: 'notification',
     initialState,
     reducers: {
-      reset: (state) => initialState,
+      reset: (state) => state
     },
     extraReducers: (builder) => {
       builder

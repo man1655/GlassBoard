@@ -24,11 +24,10 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 1. Validation
     if (formData.newPassword !== formData.confirmPassword) {
       return notify.error("New passwords do not match");
     }
-    if (formData.newPassword.length < 6) {
+    if (formData.newPassword.length < 8) {
       return notify.error("Password must be at least 6 characters");
     }
 
