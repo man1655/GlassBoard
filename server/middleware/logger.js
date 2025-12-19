@@ -12,7 +12,6 @@ export const logActivity = async (userId, userName, action, moduleName) => {
       description: description
     });
 
-    console.log(`[Log]: ${description}`); // Helpful for debugging
   } catch (err) {
     console.error("Logging failed:", err);
   }

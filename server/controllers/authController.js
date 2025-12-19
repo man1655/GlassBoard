@@ -96,10 +96,8 @@ export const updateProfile = async (req, res) => {
     const userId = req.user.id;
     let updateData = { ...req.body }; // Start with the text data (bio, phone, etc.)
 
-    console.log("--- FORCE UPDATE PROFILE ---");
 
     if (req.file) {
-      console.log("Creating Cloudinary URL...");
 
       const b64 = Buffer.from(req.file.buffer).toString("base64");
       let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
@@ -108,7 +106,6 @@ export const updateProfile = async (req, res) => {
         folder: "glassboard_avatars",
       });
 
-      console.log("New Avatar URL:", result.secure_url);
       updateData.avatar = result.secure_url;
     }
 

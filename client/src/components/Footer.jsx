@@ -1,5 +1,6 @@
 import React from 'react';
 import { Github, Twitter, Linkedin } from 'lucide-react';
+import { FaGithub, FaLinkedinIn } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -19,14 +20,12 @@ const Footer = () => {
 
         {/* Right: Social Icons */}
         <div className="flex items-center gap-4">
-            <a href="#" className="text-white/40 hover:text-white hover:scale-110 transition-all">
-                <Github size={20} />
+            <a href="https://github.com/man1655/GlassBoard" className="text-white/40 hover:text-white hover:scale-110 transition-all">
+                <FaGithub size={20} />
             </a>
-            <a href="#" className="text-white/40 hover:text-blue-400 hover:scale-110 transition-all">
-                <Twitter size={20} />
-            </a>
+            
             <a href="#" className="text-white/40 hover:text-blue-600 hover:scale-110 transition-all">
-                <Linkedin size={20} />
+                <FaLinkedinIn size={20} />
             </a>
         </div>
       </div>
