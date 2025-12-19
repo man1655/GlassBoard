@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 import GlassboardLoader from "../components/common/LoadingScreen";
+import LandingPage from "../pages/LandingPage";
 
 
 const ProtectedRoute = () => {
@@ -10,7 +11,7 @@ const ProtectedRoute = () => {
   }
 
   if (!isAuthChecked) {
-    return <GlassboardLoader />;
+    return <LandingPage />;
   }
 
   if (!token) {
