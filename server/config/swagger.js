@@ -6,16 +6,15 @@ const options = {
     info: {
       title: 'GlassBoard API Documentation',
       version: '1.0.0',
-      description: 'API documentation for the MERN Dashboard Application',
+      description: 'API documentation for GlassBoard Dashboard, Logs, and Notifications',
       contact: {
-        name: 'Backend Developer',
-        email: 'dev@glassboard.com', // Replace with your email
+        name: 'Support',
       },
     },
     servers: [
       {
-        url: 'http://localhost:5000/api', // Change this to your Render URL when deployed
-        description: 'Local Development Server',
+        url: 'https://glassboard-api.onrender.com', 
+        description: 'Devlopment Server',
       },
     ],
     components: {
@@ -33,10 +32,10 @@ const options = {
       },
     ],
   },
-  // Look for documentation in these files
-  apis: ['./routes/*.js', './models/*.js'], 
+ apis: ['./routes/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
+
 
 export default swaggerSpec;

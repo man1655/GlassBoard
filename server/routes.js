@@ -12,8 +12,6 @@ Router.use('/auth',authRoutes)
 Router.use('/user',dashRoutes)
 Router.use('/admin',userRoutes)
 Router.use('/log',logRoutes)
-
-
 Router.use('/notification',notificationRoutes)
 
 

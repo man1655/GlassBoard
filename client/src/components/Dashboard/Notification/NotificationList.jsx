@@ -48,6 +48,8 @@ const NotificationList = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
 
   useEffect(() => {
     dispatch(getNotifications());
@@ -75,27 +77,34 @@ const NotificationList = () => {
   };
 
   const handleSave = async (data) => {
+  try {
+    setIsSaving(true);
+
     let result;
     if (editingItem) {
-      result = await dispatch(updateNotification({ 
-        id: editingItem._id, 
-        notificationData: data 
+      result = await dispatch(updateNotification({
+        id: editingItem._id,
+        notificationData: data
       }));
       if (updateNotification.fulfilled.match(result)) {
-         notify.success("Notification updated");
+        notify.success("Notification updated");
       }
     } else {
       result = await dispatch(createNotification(data));
       if (createNotification.fulfilled.match(result)) {
-         notify.success("Broadcast sent successfully");
+        notify.success("Broadcast sent successfully");
       }
     }
-    
+
     if (!result.error) {
-        setIsModalOpen(false);
-        setEditingItem(null);
+      setIsModalOpen(false);
+      setEditingItem(null);
     }
-  };
+  } finally {
+    setIsSaving(false); // 🔑 THIS fixes infinite loading
+  }
+};
+
 
   // --- Helpers ---
 
@@ -136,7 +145,7 @@ const NotificationList = () => {
         onClose={() => { setIsModalOpen(false); setEditingItem(null); }}
         notification={editingItem}
         onSave={handleSave}
-        loading={isLoading}
+        loading={isSaving}
       />
 
       {/* --- HEADER --- */}
