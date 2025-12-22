@@ -42,7 +42,6 @@ const NotificationList = () => {
     message 
   } = useSelector((state) => state.notification);
 
-  // Local UI State
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -62,7 +61,6 @@ const NotificationList = () => {
     }
   }, [isError, message]);
 
-  // --- Handlers ---
 
   const handleDelete = async () => {
     if (selectedId) {

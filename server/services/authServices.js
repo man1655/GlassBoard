@@ -3,31 +3,36 @@ import cloudinary from "../utils/cloudinary.js";
 
 // Service to handle Registration Logic
 export const registerUser = async ({ fullName, email, password }) => {
-  // 1. Check if user exists
-  const adminCredentials=['admin123@gmail.com','admin123']
-  let role='Member'
+  const adminCredentials = ['admin123@gmail.com', 'admin123'];
+  let role = 'Member';
 
-  const userExists = await User.findOne({ email });
-  if (userExists) {
+  // 1. Check if user exists (active OR inactive)
+  const existingUser = await User.findOne({ email });
+
+  if (existingUser) {
+    if (existingUser.status === 'inactive') {
+      throw new Error("Your account is inactive. Please contact support.");
+    }
     throw new Error("User already exists");
   }
+
+  // 2. Admin role check
   if (email === adminCredentials[0] && password === adminCredentials[1]) {
-    console.log(" Admin condition MET! Setting role to admin.");
     role = "admin";
-  } else {
-    console.log(" Admin condition FAILED.");
   }
 
-  // 2. Create user
+  // 3. Create user
   const user = await User.create({
     fullName,
     email,
     password,
-    Role:role 
+    role,
+    status: "active" // explicitly set
   });
 
   return user;
 };
+
 
 // Service to handle Login Logic
 export const loginUser = async ({ email, password }) => {
@@ -49,14 +54,18 @@ export const loginUser = async ({ email, password }) => {
 
 
 export const getUserProfile = async (userId) => {
-  const user = await User.findById(userId);
-  
+  const user = await User.findOne({
+    _id: userId,
+    status: { $ne: "inactive" } 
+  });
+
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("User not found or inactive");
   }
 
   return user;
 };
+
 
 export const updateUserProfileService = async (userId, data, file) => {
 
