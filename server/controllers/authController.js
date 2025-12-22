@@ -12,6 +12,15 @@ export const UserRegister = async (req, res) => {
   try {
     const user = await registerUser(req.body);
 
+    if (user) {
+      if (user.status === "inactive") {
+        return res.status(403).json({
+          success: false,
+          message: "Your account is inactive. Please contact support.",
+        });
+      }
+    }
+
     sendTokenResponse(user, 201, res);
   } catch (error) {
     if (error.message === "User already exists") {
@@ -39,6 +48,14 @@ export const UserLogin = async (req, res) => {
         success: false,
         message: "Your account has been banned. Contact support.",
       });
+    }
+    if (user) {
+      if (user.status === "inactive") {
+        return res.status(403).json({
+          success: false,
+          message: "Your account is inactive. Please contact support.",
+        });
+      }
     }
 
     sendTokenResponse(user, 200, res);
@@ -96,9 +113,7 @@ export const updateProfile = async (req, res) => {
     const userId = req.user.id;
     let updateData = { ...req.body }; // Start with the text data (bio, phone, etc.)
 
-
     if (req.file) {
-
       const b64 = Buffer.from(req.file.buffer).toString("base64");
       let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
 
@@ -133,7 +148,6 @@ export const changePassword = async (req, res) => {
 
   const userId = req.user._id;
 
-  
   const user = await User.findById(userId).select("+password");
 
   if (!user) {
@@ -145,7 +159,7 @@ export const changePassword = async (req, res) => {
 
   if (!isMatch) {
     res.status(401);
-    throw new Error("Invalid current password"); 
+    throw new Error("Invalid current password");
   }
 
   // 4. Update and Save

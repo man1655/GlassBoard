@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { notify } from "../../utils/notify";
 
 // 1. API URL (Change this to your Render URL when deploying)
 const API_URL = import.meta.env.VITE_API_URL;
@@ -12,6 +13,10 @@ export const registerUser = createAsyncThunk(
         `${API_URL}/api/auth/register`,
         userData
       );
+      if (response.status === 403) {
+        notify.error("YOUR ACCOUNT HAS BEEN BANNED")// "Your account has been banned..."
+        return;
+      }
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
@@ -31,6 +36,10 @@ export const loginUser = createAsyncThunk(
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
+      if (response.status === 403) {
+        notify.error("YOUR ACCOUNT HAS BEEN BANNED")// "Your account has been banned..."
+        return;
+      }
       return response.data;
     } catch (error) {
       const message = error.response?.data?.message || error.message;
@@ -48,6 +57,11 @@ export const getMe = createAsyncThunk("auth/me", async (_, thunkAPI) => {
       },
     };
     const response = await axios.get(`${API_URL}/api/auth/me`, config);
+    if (response.status === 403) {
+        notify.error("YOUR ACCOUNT HAS BEEN BANNED")// "Your account has been banned..."
+        return;
+      }
+
     return response.data.data;
   } catch (error) {
     const message = error.response?.data?.message || error.message;
