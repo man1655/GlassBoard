@@ -20,6 +20,18 @@ const ActivityLogs = () => {
   useEffect(() => {
     dispatch(fetchLogs());
   }, [dispatch]);
+  const formatTimestamp = (timestamp) => {
+    return new Date(timestamp).toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+  };
 
   if (isLoading) return <DashboardLoader />;
 
@@ -86,7 +98,7 @@ const ActivityLogs = () => {
                       <div className="inline-flex items-center gap-2 tracking-wider px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
                         <Clock size={13} className="text-cyan-400" />
                         <span className="text-xs font-semibold text-white/90">
-                          {log.timestamp}
+                          {formatTimestamp(log.timestamp)}
                         </span>
                       </div>
                     </td>

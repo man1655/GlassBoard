@@ -1,5 +1,5 @@
 import ActivityLog from "../model/ActivityLog.js"
 
 export const GetLog=async()=>{
-  return await ActivityLog.find().sort({createdAt:-1});
+  return await ActivityLog.find().sort({timestamp:-1});
 }
