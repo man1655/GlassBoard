@@ -26,12 +26,12 @@ export const UserRegister = async (req, res) => {
     if (error.message === "User already exists") {
       return res.status(400).json({ success: false, message: error.message });
     }
-    // Handle server errors
+    
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// --- LOGIN CONTROLLER ---
+
 export const UserLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -63,12 +63,10 @@ export const UserLogin = async (req, res) => {
     if (error.message === "Invalid credentials") {
       return res.status(401).json({ success: false, message: error.message });
     }
-    // Handle server errors
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// --- HELPER FUNCTION (Kept in Controller) ---
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken();
 

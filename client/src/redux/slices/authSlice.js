@@ -37,7 +37,7 @@ export const loginUser = createAsyncThunk(
         localStorage.setItem("token", response.data.token);
       }
       if (response.status === 403) {
-        notify.error("YOUR ACCOUNT HAS BEEN BANNED")// "Your account has been banned..."
+        notify.error("YOUR ACCOUNT HAS BEEN BANNED")  
         return;
       }
       return response.data;
