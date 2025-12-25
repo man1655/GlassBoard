@@ -54,7 +54,7 @@
 
 * **Audit Trail:** Comprehensive logs of all critical system actions (Logins, Updates, Deletions).
 * **Visual Status:** Color-coded logs indicating success, warnings, or errors.
-* **Metadata:** Tracks IP addresses, timestamps, and actor details.
+* **Metadata:**  timestamps, and actor details.
 
 ---
 
