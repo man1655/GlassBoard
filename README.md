@@ -120,7 +120,7 @@ cd glassboard
 Navigate to the backend directory, install dependencies, and start the server.
 
 ```bash
-cd backend
+cd server
 npm install
 
 # Run in development mode (with Nodemon)
@@ -135,7 +135,7 @@ npm run dev
 Open a **new terminal** window, navigate to the frontend directory, and start the client.
 
 ```bash
-cd frontend
+cd client
 npm install
 
 # Run the Vite development server
